@@ -7,13 +7,15 @@ typedef struct Sll Sll;
 
 Sll * makeSll();
 
-void destroy(Sll *list);
+void destroy(Sll *);
 
-int length(Sll *list);
+int length(Sll *);
 
-void add(Sll *list, int data, int position);
+void add(Sll *, int, int);
 
-void print(Sll *list);
+void undo(Sll *, int);
+
+void print(Sll *);
 
 #endif
 

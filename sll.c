@@ -48,9 +48,9 @@ void add(Sll *list, int data, int position) {
 	}
 
 	Node *pnt = list->head;
-	int tmp = position-1;
+	int tmp = position;
 	
-	while (0 < tmp) {
+	while (1 < tmp) {
 		--tmp;
 		pnt = pnt->next;
 	}
@@ -62,6 +62,23 @@ void add(Sll *list, int data, int position) {
 		pnt->next = element;
 	}
 	++(list->length);
+	return;
+}
+
+void undo(Sll *list, int position) {
+	Node *pnt = list->head;
+	if (position == 0) {
+		list->head = list->head->next;
+		free(pnt);
+		return;
+	}
+	while (1 < position) {
+		--position;
+		pnt = pnt->next;
+	}
+	Node* tmp = pnt->next;
+	pnt->next = pnt->next->next;
+	free(tmp);
 	return;
 }
 
