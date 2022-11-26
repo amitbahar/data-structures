@@ -1,2 +1,1 @@
-# data-structures
-famous data structures implemented with the c programming language.
+i do not take any responsibily for ills made this code.
