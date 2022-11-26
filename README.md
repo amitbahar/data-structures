@@ -1,1 +1,1 @@
-i do not take any responsibily for ills made this code.
+i do not take any responsibility for ills made by this code.
