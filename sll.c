@@ -21,6 +21,20 @@ Sll * makeSll() {
 }
 
 void destroy(Sll *list) {
+	Node* current = list->head;
+	Node* tmp = list->head->next;
+	
+	if (current == NULL) {
+		free(list);
+		return;
+	} else {
+		while (tmp != NULL) {
+			free(current);
+			current = tmp;
+			tmp = tmp->next;
+		}
+		free(current);
+	}
 	free(list);
 	return;
 }
