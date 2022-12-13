@@ -20,7 +20,7 @@ Sll * makeSll() {
 	return list;
 }
 
-void destroy(Sll *list) {
+void destroylist(Sll *list) {
 	Node* current = list->head;
 	Node* tmp = list->head->next;
 	

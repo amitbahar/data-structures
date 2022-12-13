@@ -7,7 +7,7 @@ typedef struct Sll Sll;
 
 Sll * makeSll();
 
-void destroy(Sll *);
+void destroylist(Sll *);
 
 int length(Sll *);
 
