@@ -1,28 +1,18 @@
 /**
  * @file list.c
  * @author: Amit Bajar
- * @brief interface implementation of a simple singly linked list of int values
+ * @brief interface implementation of a simple singly linked list of values
 */
 
 #include <stdio.h>
 #include <stdlib.h>
 #include "list.h"
 
-typedef struct Node {
-	struct Node *next;
-	int data;
-} Node;
-
-typedef struct List {
-	struct Node *head;
-	int length;
-} List;
-
 /**
  * @brief creates an empty list. Time complexity: O(1)
  * @return empty list
 */
-List * list_make() {
+List* list_make() {
 	List *list = (List*)malloc(sizeof(list));
 	list->head = NULL;
 	list->length = 0;
@@ -36,8 +26,8 @@ List * list_make() {
  * @brief deallocate the memory of list
 */
 void list_destroy(List *list) {
-	Node* current = list->head;
-	Node* tmp = list->head->next;
+	ListNode* current = list->head;
+	ListNode* tmp = list->head->next;
 	
 	if (current == NULL) {
 		free(list);
@@ -48,6 +38,7 @@ void list_destroy(List *list) {
 			current = tmp;
 			tmp = tmp->next;
 		}
+		free(current->data);
 		free(current);
 	}
 	free(list);
@@ -64,13 +55,26 @@ int list_length(List *list) {
 }
 
 /**
+ * @param list @param position
+ * @return element at position
+ * @warning list must be none emtpy AND must always satisfy 0<=position<=length(list)-1
+*/
+void* list_retrieve(List *list, int position) {
+	ListNode *pnt = list->head;
+	for (int i = 0; i < position; ++i) {
+		pnt = pnt->next;
+	}
+	return pnt->data;
+}
+
+/**
  * @param data int value to insert @param position position to insert value
  * @brief adds a new list element with given data at given position. 
  * Time Complexity: O(position)
  * @warning must always satisfy 0<=position<=length(list)
 */
-void list_insert(List *list, int data, int position) {
-	Node *element = (Node *)malloc(sizeof(Node));
+void list_insert(List *list, void* data, int position) {
+	ListNode *element = (ListNode *)malloc(sizeof(ListNode));
 	element->next = NULL;
 	element->data = data;
 
@@ -87,7 +91,7 @@ void list_insert(List *list, int data, int position) {
 		return;
 	}
 
-	Node *pnt = list->head;
+	ListNode *pnt = list->head;
 	int tmp = position;
 	
 	while (1 < tmp) {
@@ -112,19 +116,23 @@ void list_insert(List *list, int data, int position) {
  * @warning must always satisfy 0<=position<=length-1
 */
 void list_delete(List *list, int position) {
-	Node *pnt = list->head;
+	ListNode *pnt = list->head;
 	if (position == 0) {
 		list->head = list->head->next;
+		free(pnt->data);
 		free(pnt);
+		list->length--;
 		return;
 	}
 	while (1 < position) {
 		--position;
 		pnt = pnt->next;
 	}
-	Node* tmp = pnt->next;
+	ListNode* tmp = pnt->next;
 	pnt->next = pnt->next->next;
+	free(tmp->data);
 	free(tmp);
+	list->length--;
 	return;
 }
 
@@ -137,13 +145,13 @@ void list_print(List *list) {
 	if (list->head == NULL) {
 		printf("Empty");
 	} else {
-		Node *pnt = list->head;
+		ListNode *pnt = list->head;
 		
 		while (pnt != NULL) {
 			if (pnt->next == NULL) {
-				printf("%d\n",pnt->data);
+				printf("%p\n",pnt->data);
 			} else {
-				printf("%d->",pnt->data);
+				printf("%p->",pnt->data);
 			}
 			pnt = pnt->next;
 		}
