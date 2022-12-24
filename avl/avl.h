@@ -7,14 +7,24 @@
 #ifndef AVL_HEADER
 #define AVL_HEADER
 
-typedef struct Tree Tree; //tree
+typedef struct TreeNode {
+	struct TreeNode *plr[3]; //parent-left-right
+	int dhv[3]; //data-height-virtual
+} TreeNode;
 
-Tree * tree_make(); //make empty avl tree
+typedef struct Tree {
+	TreeNode *head;
+	TreeNode *virtual;
+} Tree;
 
-void tree_destroy(Tree *); //deallocate avl tree
+Tree* tree_make(); //make empty avl tree
 
-void tree_insert(Tree *, int); //insert element with value int
+void tree_destroy(Tree*); //deallocate avl tree
 
-void tree_print(Tree *); //print integer values in order
+void tree_insert(Tree*, int); //insert element with value int
+
+void tree_inorder(Tree*); //print integer values in order
+
+void tree_print(Tree*); //print tree
 
 #endif
