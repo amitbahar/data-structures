@@ -1,18 +1,19 @@
-#include "avl/avl.h"
-#include "list/list.h"
 #include <stdio.h>
+#include <stdlib.h>
+#include "avl/avl.h"
+
 
 int main() { //simple test of structures
 	Tree *tree = tree_make();
-	List *list = list_make();
-	for (int i = 0; i <10; ++i) {
-		list_insert(list,i,list_length(list));
-		tree_insert(tree,i);
-	}
-	printf("Print List values:\n");
-	list_print(list);
-	list_destroy(list);
-	printf("Print Tree values:\n");
+	tree_insert(tree,2);
+	tree_insert(tree,1);
+	tree_insert(tree,4);
+	tree_insert(tree,6);
+	tree_insert(tree,3);
+	tree_insert(tree,8);
+	tree_insert(tree,10);
+	tree_insert(tree,11);
+
 	tree_print(tree);
 	tree_destroy(tree);
 	
