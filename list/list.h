@@ -9,7 +9,7 @@
 
 typedef struct ListNode {
 	struct ListNode *next;
-	void* data;
+	void *data;
 } ListNode;
 
 typedef struct List {
@@ -28,8 +28,6 @@ void* list_retrieve(List*,int); //retrieve data at position
 void list_insert(List*, void*, int);
 
 void list_delete(List*, int); //delete at position = int
-
-void list_print(List*); //print values
 
 #endif
 

@@ -9,9 +9,57 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+//helper function
 static int max(int a, int b) {
 	return a < b ? b : a;
-} //helper function
+}
+
+static int digits(int num) {
+	int flag = 0;
+	if (num < 0) {
+		flag = 1; //if its negative we need 1 more digit for the -
+		num *= -1;
+	}
+
+	int n = 0;
+	while (0 < num) {
+		num = num/10;
+		++n;
+	}
+	return flag == 0 ? n : n+1;
+}
+
+static int mpow(int a, int b) {//a^b
+	int result = 1;
+	while (0 < b) {
+		result *= a;
+		--b;
+	}
+	return result;
+}
+
+static char* dtbin(int n, int num) {//decimal to binary
+	char *string = (char*)malloc((n+1)*sizeof(char));
+	char a;
+	int i = 0;
+	*(string+n) = '\0';
+	while (0 < num) {
+		if (num%2 == 1) {
+			*(string+n-i-1) = '1';
+		} else {
+			*(string+n-i-1) = '0';
+		}
+		num = num / 2;
+		++i;
+	}
+	while (0 < n - i) {
+		++i;
+		*(string+n-i) = '0';
+	}
+
+	return string;
+	
+}
 
 /**
  * @brief makes an empty avl tree.
@@ -172,6 +220,21 @@ int tree_max(Tree *tree) {
 	return ptr->dhv[0];
 }
 
+/**
+ * @param tree
+ * @return minimum value in tree
+ * @warning tree MUST be None empty!
+*/
+int tree_min(Tree *tree) {
+	TreeNode *ptr = tree->head;
+
+	while (ptr->plr[1]->dhv[2] != 1) {
+		ptr = ptr->plr[1];
+	}
+
+	return ptr->dhv[0];
+}
+
 int _tree_height(TreeNode *node) {
 	if (node->dhv[2] == 1) {//base case - virtual node has height -1
 		return -1;
@@ -211,95 +274,11 @@ void tree_inorder(Tree *tree) {
 	printf("\n");
 }
 
-static int digits(int num) {
-	if (num < 0) {
-		num *= -1; //doesn't matter if its negative
-	}
-
-	int n = 0;
-	while (0 < num) {
-		num = num/10;
-		++n;
-	}
-	return n;
-}
-
-static void treeprow_rec(int len, int n, int digit, List *values) {
-	if (n == 1) {
-		int padding = (len-digit*n)/(n+1);
-		int *pnt;
-		int value;
-		pnt = (int*)list_retrieve(values,0);
-		value = *pnt;
-		printf("%*s", padding, "");
-		if (value != -1) {
-			printf("%0*d",digit,value);
-		} else {
-			char x[digit+1];
-			for (int i = 0; i < digit; ++i) {
-				x[i] = 'x';
-			}
-			x[digit] = '\0';
-			printf("%s",x);
-		}
-		printf("%*s", padding, "");
-		return;
-	} else {
-		List *values1 = list_make();
-		List *values2 = list_make();
-
-		for (int i = 0; i < (values->length)/2; ++i) {
-			list_insert(values1,list_retrieve(values,i),values1->length);
-		}
-		for (int i = (values->length)/2; i < values->length; ++i) {
-			list_insert(values2,list_retrieve(values,i),values2->length);
-		}
-
-		treeprow_rec((len-1)/2, n/2, digit, values1);
-		printf("%*s", digit, "");
-		treeprow_rec((len-1)/2, n/2, digit, values2);
-	}
-}
-
-static int mpow(int a, int b) {//a^b
-	int result = 1;
-	while (0 < b) {
-		result *= a;
-		--b;
-	}
-	return result;
-}
-
-static char* dtbin(int n, int num) {//decimal to binary
-	char *string = (char*)malloc((n+1)*sizeof(char));
-	char a;
-	int i = 0;
-	*(string+n) = '\0';
-	while (0 < num) {
-		if (num%2 == 1) {
-			*(string+n-i-1) = '1';
-		} else {
-			*(string+n-i-1) = '0';
-		}
-		num = num / 2;
-		++i;
-	}
-	while (0 < n - i) {
-		++i;
-		*(string+n-i) = '0';
-	}
-
-	return string;
-	
-}
-
-static List* valuesn(Tree *tree, int n) {
-	List* values = list_make();
+static int* values_depth_n(Tree *tree, int n) {
+	int *arr = malloc(mpow(2,n)*sizeof(int)); //array of values
 	if (n == 0) {
-		int *data = (int*)malloc(sizeof(int));
-		*data = tree->head->dhv[0];
-		list_insert(values,data,values->length);
-		return values;
+		*arr = tree->head->dhv[0];
+		return arr;
 	}
 	char *num;
 	for (int i = 0; i <= mpow(2,n)-1; ++i) {
@@ -313,26 +292,89 @@ static List* valuesn(Tree *tree, int n) {
 			}
 			
 			if (ptr->dhv[2] == 1) {
-				int *data = (int*)malloc(sizeof(int));
-				*data = -1;
-				list_insert(values,data,values->length);
+				*(arr+i) = -1; //does not matter because virtual at this place will make it xx..x
 				break;
 			}
 		}
 		if (ptr->dhv[2] == 0) {
-			int *data = (int*)malloc(sizeof(int));
-			*data = ptr->dhv[0];
-			list_insert(values,data,values->length);
+			*(arr+i) = ptr->dhv[0];
 		}
 	}
 	free(num);
-	return values;
+	return arr;
 }
 
+static int* virtual_depth_n(Tree *tree, int n) {
+	int *arr = malloc(mpow(2,n)*sizeof(int)); //[0,1,0,0,...1] whether the node is virtual or not at depth n
+	if (n == 0) {
+		*arr = tree->head->dhv[0];
+		return arr;
+	}
+	char *num;
+	for (int i = 0; i <= mpow(2,n)-1; ++i) {
+		num = dtbin(n,i);
+		TreeNode *ptr = tree->head;
+		for (int j = 0; j < n; ++j) {
+			if (*(num+j) == '0') {
+				ptr = ptr->plr[1];
+			} else {
+				ptr = ptr->plr[2];
+			}
+			
+			if (ptr->dhv[2] == 1) {
+				*(arr+i) = 1;
+				break;
+			}
+		}
+		if (ptr->dhv[2] == 0) {
+			*(arr+i) = 0;
+		}
+	}
+	free(num);
+	return arr;
+}
+
+static void treeprow_rec(int len, int n, int digit, int* values, int* virtual) {
+	if (n == 1) {
+		int padding = (len-digit*n)/(n+1);
+		int value = *values;
+		printf("%*s", padding, "");
+		if (*virtual != 1) {
+			printf("%0*d",digit,value);
+		} else {
+			char x[digit+1];
+			for (int i = 0; i < digit; ++i) {
+				x[i] = 'x';
+			}
+			x[digit] = '\0';
+			printf("%s",x);
+		}
+		printf("%*s", padding, "");
+		return;
+	} else {
+		int values1[n/2];
+		int values2[n/2];
+		int virtual1[n/2];
+		int virtual2[n/2];
+
+		for (int i = 0; i < n/2; ++i) {
+			values1[i] = *(values+i);
+			virtual1[i] = *(virtual+i);
+		}
+		for (int i = n/2; i < n; ++i) {
+			values2[i-n/2] = *(values+i);
+			virtual2[i-n/2] = *(virtual+i);
+		}
+
+		treeprow_rec((len-1)/2, n/2, digit, values1, virtual1);
+		printf("%*s", digit, "");
+		treeprow_rec((len-1)/2, n/2, digit, values2, virtual2);
+	}
+}
 
 /**
  * @param tree
- * @brief returns visual representation of the tree.
+ * @brief returns visual representation of the tree. 
 */
 void tree_print(Tree *tree) {
 	if (tree->head == NULL) {
@@ -340,7 +382,8 @@ void tree_print(Tree *tree) {
 		return;
 	}
 	int max = tree_max(tree); //maximum value
-	int digit = digits(max); //maxium number of digits in tree
+	int min = tree_min(tree); //miminum value
+	int digit = digits(max) < digits(min) ? digits(min) : digits(max); //maxium number of digits in tree
 	int height = tree_height(tree); //get height
 	int len = 2*1+digit; //base linelength
 
@@ -348,10 +391,12 @@ void tree_print(Tree *tree) {
 		len = 2*len + digit;
 	}
 
-	List *values = list_make();
+	int* values;
+	int* virtual;
 	for (int i = 0; i <= height; ++i) {
-		values = valuesn(tree,i);
-		treeprow_rec(len,mpow(2,i),digit,values);
+		values = values_depth_n(tree,i);
+		virtual = virtual_depth_n(tree,i);
+		treeprow_rec(len,mpow(2,i),digit,values,virtual);
 		printf("\n");
 	}
 }

@@ -14,9 +14,7 @@
 */
 List* list_make() {
 	List *list = (List*)malloc(sizeof(list));
-	list->head = NULL;
-	list->length = 0;
-	
+	*list = (List){.head = NULL, .length = 0};
 	return list;
 }
 
@@ -27,18 +25,19 @@ List* list_make() {
 */
 void list_destroy(List *list) {
 	ListNode* current = list->head;
-	ListNode* tmp = list->head->next;
 	
 	if (current == NULL) {
 		free(list);
 		return;
 	} else {
-		while (tmp != NULL) {
+		ListNode* tmp = list->head->next;
+		while (tmp != NULL) { //free current as long as there is next
+			free(current->data);
 			free(current);
 			current = tmp;
 			tmp = tmp->next;
 		}
-		free(current->data);
+		free(current->data); //free last node
 		free(current);
 	}
 	free(list);
@@ -68,26 +67,24 @@ void* list_retrieve(List *list, int position) {
 }
 
 /**
- * @param data int value to insert @param position position to insert value
+ * @param data value to insert @param position position to insert value
  * @brief adds a new list element with given data at given position. 
  * Time Complexity: O(position)
  * @warning must always satisfy 0<=position<=length(list)
 */
 void list_insert(List *list, void* data, int position) {
 	ListNode *element = (ListNode *)malloc(sizeof(ListNode));
-	element->next = NULL;
-	element->data = data;
+	*element = (ListNode){.next = NULL, .data = data};
+	++(list->length);
 
 	if (list->head == NULL) {
 		list->head = element;
-		++(list->length);
 		return;
 	}
 	
 	if (position == 0) {
 		element->next = list->head;
 		list->head = element;
-		++(list->length);
 		return;
 	}
 
@@ -99,13 +96,12 @@ void list_insert(List *list, void* data, int position) {
 		pnt = pnt->next;
 	}
 	
-	if (position == list_length(list)) {
+	if (position == list_length(list)-1) { //subtract 1 because we already increased the length
 		pnt->next = element;
 	} else {
 		element->next = pnt->next;
 		pnt->next = element;
 	}
-	++(list->length);
 	return;
 }
 
@@ -119,7 +115,6 @@ void list_delete(List *list, int position) {
 	ListNode *pnt = list->head;
 	if (position == 0) {
 		list->head = list->head->next;
-		free(pnt->data);
 		free(pnt);
 		list->length--;
 		return;
@@ -130,32 +125,9 @@ void list_delete(List *list, int position) {
 	}
 	ListNode* tmp = pnt->next;
 	pnt->next = pnt->next->next;
-	free(tmp->data);
 	free(tmp);
 	list->length--;
 	return;
-}
-
-/**
- * @param list
- * @brief prints list values in order. 
- * Time complexity: O(length)
-*/
-void list_print(List *list) {
-	if (list->head == NULL) {
-		printf("Empty");
-	} else {
-		ListNode *pnt = list->head;
-		
-		while (pnt != NULL) {
-			if (pnt->next == NULL) {
-				printf("%p\n",pnt->data);
-			} else {
-				printf("%p->",pnt->data);
-			}
-			pnt = pnt->next;
-		}
-	}
 }
 
 
