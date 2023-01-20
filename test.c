@@ -1,20 +1,20 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "src/avl/avl.h"
+#include "src/avltree/avltree.h"
 
 int main() { //simple test of structures
-	Tree *tree = tree_make();
-	tree_insert(tree,8);
-	tree_insert(tree,10);
-	tree_insert(tree,20);
-	tree_insert(tree,40);
-	tree_insert(tree,7);
-	tree_insert(tree,-1);
-	tree_insert(tree,15);
-	tree_insert(tree,-30);
+	AVLTree *tree = avltree_make();
+	avltree_insert(tree,8);
+	avltree_insert(tree,10);
+	avltree_insert(tree,20);
+	avltree_insert(tree,40);
+	avltree_insert(tree,7);
+	avltree_insert(tree,-1);
+	avltree_insert(tree,15);
+	avltree_insert(tree,-30);
 
-	tree_print(tree);
-	tree_destroy(tree);
+	avltree_print(tree);
+	avltree_destroy(tree);
 	
 	return 0;
 }

@@ -1,11 +1,10 @@
 /**
- * @file avl.c
+ * @file avltree.c
  * @author Amit Bajar
  * @brief interface implementation for a simple avl tree holding integer values that act as keys
 */
 
-#include "../list/list.h"
-#include "avl.h"
+#include "avltree.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -66,15 +65,15 @@ static char* dtbin(int n, int num) {//decimal to binary
  * Time complexity: O(1)
  * @return empty avl tree
 */
-Tree* tree_make() {
-	TreeNode *virtual = (TreeNode *)malloc(sizeof(TreeNode)); 
-	*virtual = (TreeNode){{NULL,NULL,NULL},0,-1,1}; //construct virtual node
-	Tree *tree = (Tree *)malloc(sizeof(Tree));
-	*tree = (Tree){NULL,virtual}; //head is null at initialization
+AVLTree* avltree_make() {
+	AVLTreeNode *virtual = (AVLTreeNode *)malloc(sizeof(AVLTreeNode)); 
+	*virtual = (AVLTreeNode){{NULL,NULL,NULL},0,-1,1}; //construct virtual node
+	AVLTree *tree = (AVLTree *)malloc(sizeof(AVLTree));
+	*tree = (AVLTree){NULL,virtual}; //head is null at initialization
 	return tree;
 }
 
-static void _destroyrec(TreeNode *head) { //recursive function to free memory of tree
+static void _destroyrec(AVLTreeNode *head) { //recursive function to free memory of tree
 	if (head->dhv[2] == 1) {
 		return;
 	} else {
@@ -90,14 +89,15 @@ static void _destroyrec(TreeNode *head) { //recursive function to free memory of
  * @brief deallocate memory of tree.
  * Time Complexity: O(size)
 */
-void tree_destroy(Tree *tree) {
+void avltree_destroy(AVLTree *tree) {
 	_destroyrec(tree->head);
 	free(tree->virtual);
+	free(tree);
 	return;
 }
 
-static void _rrotate(TreeNode *node, Tree *tree) {
-	TreeNode *lson = node->plr[1]; //pointer to left son
+static void _rrotate(AVLTreeNode *node, AVLTree *tree) {
+	AVLTreeNode *lson = node->plr[1]; //pointer to left son
 	if (node->plr[0] == NULL) { //edge case no parent
 		tree->head = lson;
 		lson->plr[0] = NULL;
@@ -118,8 +118,8 @@ static void _rrotate(TreeNode *node, Tree *tree) {
 	lson->dhv[1] = max(lson->plr[1]->dhv[1],lson->plr[2]->dhv[1])+1;
 }
 
-static void _lrotate(TreeNode *node, Tree *tree) { //symetric to right rotate
-	TreeNode *rson = node->plr[2];
+static void _lrotate(AVLTreeNode *node, AVLTree *tree) { //symetric to right rotate
+	AVLTreeNode *rson = node->plr[2];
 	if (node->plr[0] == NULL) {
 		tree->head = rson;
 		rson->plr[0] = NULL;
@@ -140,12 +140,12 @@ static void _lrotate(TreeNode *node, Tree *tree) { //symetric to right rotate
 	rson->dhv[1] = max(rson->plr[1]->dhv[1],rson->plr[2]->dhv[1])+1;
 }
 
-static void _rlrotate(TreeNode *node, Tree *tree) {
+static void _rlrotate(AVLTreeNode *node, AVLTree *tree) {
 	_rrotate(node->plr[2],tree);
 	_lrotate(node,tree);
 }
 
-static void _lrrotate(TreeNode *node, Tree *tree) {
+static void _lrrotate(AVLTreeNode *node, AVLTree *tree) {
 	_lrotate(node->plr[1], tree);
 	_rrotate(node,tree);
 }
@@ -155,16 +155,16 @@ static void _lrrotate(TreeNode *node, Tree *tree) {
  * @brief inserts a new element with give data to tree.
  * Time complexity: O(height)
 */
-void tree_insert(Tree *tree, int data) {
-	TreeNode *new = (TreeNode *)malloc(sizeof(TreeNode)); //creating the new node
+void avltree_insert(AVLTree *tree, int data) {
+	AVLTreeNode *new = (AVLTreeNode *)malloc(sizeof(AVLTreeNode)); //creating the new node
 	new->plr[0] = NULL;
 	new->plr[1] = tree->virtual;
 	new->plr[2] = tree->virtual;
 	new->dhv[0] = data;
 	new->dhv[1] = 0;
 	new->dhv[2] = 0;
-	TreeNode *tmp = tree->head; //pointer
-	TreeNode *tmpparent; //parent of pointer
+	AVLTreeNode *tmp = tree->head; //pointer
+	AVLTreeNode *tmpparent; //parent of pointer
 	
 	if (tmp == NULL) { //edge case tree is empty
 		tree->head = new;
@@ -211,8 +211,8 @@ void tree_insert(Tree *tree, int data) {
  * @return maximum value in tree
  * @warning tree MUST be None empty!
 */
-int tree_max(Tree *tree) {
-	TreeNode *ptr = tree->head;
+int avltree_max(AVLTree *tree) {
+	AVLTreeNode *ptr = tree->head;
 
 	while (ptr->plr[2]->dhv[2] != 1) {
 		ptr = ptr->plr[2];
@@ -226,8 +226,8 @@ int tree_max(Tree *tree) {
  * @return minimum value in tree
  * @warning tree MUST be None empty!
 */
-int tree_min(Tree *tree) {
-	TreeNode *ptr = tree->head;
+int avltree_min(AVLTree *tree) {
+	AVLTreeNode *ptr = tree->head;
 
 	while (ptr->plr[1]->dhv[2] != 1) {
 		ptr = ptr->plr[1];
@@ -236,7 +236,7 @@ int tree_min(Tree *tree) {
 	return ptr->dhv[0];
 }
 
-int _tree_height(TreeNode *node) {
+int _tree_height(AVLTreeNode *node) {
 	if (node->dhv[2] == 1) {//base case - virtual node has height -1
 		return -1;
 	}
@@ -248,14 +248,14 @@ int _tree_height(TreeNode *node) {
  * @return height of tree
  * @warning empty tree has height -1.
 */
-int tree_height(Tree *tree) {
+int avltree_height(AVLTree *tree) {
 	if (tree->head == NULL) {
 		return -1;
 	}
 	return _tree_height(tree->head);
 }
 
-static void _inorder(TreeNode *node) {
+static void _inorder(AVLTreeNode *node) {
 	if (node->dhv[2] == 1) {
 		return;
 	} else {
@@ -270,12 +270,12 @@ static void _inorder(TreeNode *node) {
  * @brief prints tree values in order.
  * Time complexity: O(size)
 */
-void tree_inorder(Tree *tree) {
+void avltree_inorder(AVLTree *tree) {
 	_inorder(tree->head);
 	printf("\n");
 }
 
-static int* values_depth_n(Tree *tree, int n) {
+static int* values_depth_n(AVLTree *tree, int n) {
 	int *arr = malloc(mpow(2,n)*sizeof(int)); //array of values
 	if (n == 0) {
 		*arr = tree->head->dhv[0];
@@ -284,7 +284,7 @@ static int* values_depth_n(Tree *tree, int n) {
 	char *num;
 	for (int i = 0; i <= mpow(2,n)-1; ++i) {
 		num = dtbin(n,i);
-		TreeNode *ptr = tree->head;
+		AVLTreeNode *ptr = tree->head;
 		for (int j = 0; j < n; ++j) {
 			if (*(num+j) == '0') {
 				ptr = ptr->plr[1];
@@ -305,7 +305,7 @@ static int* values_depth_n(Tree *tree, int n) {
 	return arr;
 }
 
-static int* virtual_depth_n(Tree *tree, int n) {
+static int* virtual_depth_n(AVLTree *tree, int n) {
 	int *arr = malloc(mpow(2,n)*sizeof(int)); //[0,1,0,0,...1] whether the node is virtual or not at depth n
 	if (n == 0) {
 		*arr = tree->head->dhv[0];
@@ -314,7 +314,7 @@ static int* virtual_depth_n(Tree *tree, int n) {
 	char *num;
 	for (int i = 0; i <= mpow(2,n)-1; ++i) {
 		num = dtbin(n,i);
-		TreeNode *ptr = tree->head;
+		AVLTreeNode *ptr = tree->head;
 		for (int j = 0; j < n; ++j) {
 			if (*(num+j) == '0') {
 				ptr = ptr->plr[1];
@@ -377,15 +377,15 @@ static void treeprow_rec(int len, int n, int digit, int* values, int* virtual) {
  * @param tree
  * @brief returns visual representation of the tree. 
 */
-void tree_print(Tree *tree) {
+void avltree_print(AVLTree *tree) {
 	if (tree->head == NULL) {
 		printf("Empty\n");
 		return;
 	}
-	int max = tree_max(tree); //maximum value
-	int min = tree_min(tree); //miminum value
+	int max = avltree_max(tree); //maximum value
+	int min = avltree_min(tree); //miminum value
 	int digit = digits(max) < digits(min) ? digits(min) : digits(max); //maxium number of digits in tree
-	int height = tree_height(tree); //get height
+	int height = avltree_height(tree); //get height
 	int len = 2*1+digit; //base linelength
 
 	for (int i = 0; i < height; ++i) {//calculate linelength
