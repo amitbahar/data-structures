@@ -1,9 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "avl/avl.h"
-#include "heap/heap.h"
-#include "list/list.h"
-
+#include "src/avl/avl.h"
 
 int main() { //simple test of structures
 	Tree *tree = tree_make();

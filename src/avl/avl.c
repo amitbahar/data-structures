@@ -92,6 +92,7 @@ static void _destroyrec(TreeNode *head) { //recursive function to free memory of
 */
 void tree_destroy(Tree *tree) {
 	_destroyrec(tree->head);
+	free(tree->virtual);
 	return;
 }
 

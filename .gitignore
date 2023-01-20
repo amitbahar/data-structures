@@ -1,2 +1,4 @@
-.vscode/*.json
+.gitignore
+.vscode
 bin
+src/*/bin
