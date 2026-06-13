@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <stdlib.h>
 #include "../src/graph/graph.h"
 
 int main() { //simple test of structures
